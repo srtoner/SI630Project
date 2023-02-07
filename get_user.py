@@ -75,7 +75,7 @@ json_response = response.json()
 print(json.dumps(json_response, indent=4, sort_keys=True))
 
 # Save for later
-with open('my_oauth.txt', 'w') as f:
-    f.writelines([k for k in oauth_tokens.keys()])
+with open('my_oauth.json', 'w') as f:
+    json.dump(oauth_tokens, f)
 
 print("Pause:")
