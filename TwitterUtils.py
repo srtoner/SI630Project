@@ -111,7 +111,7 @@ class TwitterClient:
             raise Exception(response.status_code, response.text)
         return response.json()
     
-    def connect_to_endpoint_geo(self, url, params):
+    def get_geo(self, url, params):
         response = requests.request("GET", url + params + '.json', auth=self.bearer_oauth)
         print(response.status_code)
         if response.status_code != 200:
@@ -144,7 +144,7 @@ class TwitterClient:
 if __name__ == "__main__":
     test = TwitterClient()
     rules = test.get_rules()
-    sample = test.get_stream(rules, sample_size = 10)
+    sample = test.get_stream(rules, sample_size = 100)
     user_params = {'user.fields' : 'location,name,description'}
     #  user.derived.location.geo
     tweet_locations = [s['data'].get('geo').get('place_id') for s in sample]
@@ -155,15 +155,17 @@ if __name__ == "__main__":
     user_test = test.connect_to_endpoint(user_endpoint, user_params)
     print("Pause")
 
-    # loc = api.lookup_places(tweet_locations)
-
-    user_locations = [user.get('location') for user in user_test['data']]
-    # Get actual user locations
-    # location_params = {'granularity' : 'sub_region'}
     location_params = {}
     location_endpoint = GEO + "geo/id/"
     location_params = '.json,'.join(tweet_locations)
-    loc_test = test.connect_to_endpoint_geo(location_endpoint, location_params)
+    places = {}
+
+    # Beware of exceeding the rate limit
+
+    for place in tweet_locations:
+       if not places.get(place):
+            places[place] = api.geo_id(place)
+        #    places[place] = test.get_geo(location_endpoint, place)
     print("Pause")
     
     with open('users.json', 'w') as f:
