@@ -8,6 +8,9 @@ from datetime import datetime
 # export 'CONSUMER_SECRET'='<your_consumer_secret>'
 
 bearer_token = os.environ.get("BEARER_TOKEN")
+consumer_key = os.environ.get("CONSUMER_KEY")
+consumer_secret = os.environ.get("CONSUMER_SECRET")
+
 
 with open('my_oauth.json', 'r') as f:
     oauth_tokens = json.load(f)
