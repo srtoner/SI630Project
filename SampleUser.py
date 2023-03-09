@@ -11,6 +11,8 @@ client = MongoClient('localhost', 27017)
 db = client.test # Load test database 
 collection = db.test # Within database, have collection
 
+user_collection = db.users
+
 sample_set = db.test.distinct('data.id')
 
 samples = []
