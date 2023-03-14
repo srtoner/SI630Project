@@ -7,8 +7,7 @@ import pickle as pkl
 import time
 
 import tweepy
-# Reference:
-# Tweet Attributes: 
+
 
 with open('my_oauth.json', 'r') as f:
     oauth_tokens = json.load(f)
@@ -144,9 +143,10 @@ class TwitterClient:
         return self.sample
     
 if __name__ == "__main__":
+    
     test = TwitterClient()
     rules = test.get_rules()
-    sample = test.get_stream(rules, sample_size =50)
+    sample = test.get_stream(rules, sample_size=50)
     user_params = {'user.fields' : 'location,name,description'}
     #  user.derived.location.geo
     tweet_locations = [s['data'].get('geo').get('place_id') for s in sample]
@@ -155,8 +155,14 @@ if __name__ == "__main__":
     user_params['ids'] = ','.join(user_ids)
     user_endpoint = BASE + "users/"
     user_test = test.connect_to_endpoint(user_endpoint, user_params)
-    print("Pause")
+    print("Pause") 
 
+    # Concatentate users.json with existing dict
+
+    # with open('users.json', 'r') as f:
+    #     print("Length of users Regular Process): {}".format(len(user_test)))
+    #     json.dump(user_test, f)
+    rate_limit = False
     location_params = {}
     location_endpoint = GEO + "geo/id/"
     location_params = '.json,'.join(tweet_locations)
@@ -167,6 +173,7 @@ if __name__ == "__main__":
             places = pkl.load(f)
 
     # Beware of exceeding the rate limit
+    # TODO: Create some sort of script to wait until timeout complete
     for place in tweet_locations:
        if not places.get(place):
             time.sleep(3)
@@ -174,14 +181,18 @@ if __name__ == "__main__":
                 places[place] = api.geo_id(place)
             except:
                 # Timeout
+                rate_limit = True
                 print("Length of places: {}".format(len(places)))
                 with open('places.pkl', 'wb') as f:
                     pkl.dump(places, f)
                 break
         
     print("Pause")
-    with open('places.pkl', 'wb') as f:
-        pkl.dump(places, f)
+    if not rate_limit:
+        with open('places.pkl', 'wb') as f:
+            print("Length of places (No Rate Limit): {}".format(len(places)))
+            pkl.dump(places, f)
     
-    with open('users.json', 'w') as f:
+    with open('users.json', 'a+') as f:
+        print("Length of users (Regular Process): {}".format(len(user_test)))
         json.dump(user_test, f)
