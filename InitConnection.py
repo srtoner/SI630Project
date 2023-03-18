@@ -1,16 +1,17 @@
 from requests_oauthlib import OAuth1Session
 import os
 import json
-from datetime import datetime
+
+# From Twitter API docs -- Steve
 
 # In your terminal please set your environment variables by running the following lines of code.
 # export 'CONSUMER_KEY'='<your_consumer_key>'
 # export 'CONSUMER_SECRET'='<your_consumer_secret>'
+# export '
 
-bearer_token = os.environ.get("BEARER_TOKEN")
 consumer_key = os.environ.get("CONSUMER_KEY")
 consumer_secret = os.environ.get("CONSUMER_SECRET")
-
+bearer_token = os.environ.get("BEARER_TOKEN")
 
 with open('my_oauth.json', 'r') as f:
     oauth_tokens = json.load(f)
@@ -19,10 +20,6 @@ with open('my_oauth.json', 'r') as f:
 # created_at, description, entities, id, location, name,
 # pinned_tweet_id, profile_image_url, protected,
 # public_metrics, url, username, verified, and withheld
-keywords = ['obama', 'romney']
-
-current_time = datetime.now()
-
 fields = "created_at,description"
 params = {"user.fields": fields}
 
@@ -82,6 +79,7 @@ json_response = response.json()
 
 print(json.dumps(json_response, indent=4, sort_keys=True))
 
+# Save for later
 with open('my_oauth.json', 'w') as f:
     json.dump(oauth_tokens, f)
 

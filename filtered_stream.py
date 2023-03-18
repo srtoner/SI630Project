@@ -51,11 +51,8 @@ def delete_all_rules(rules):
 
 def set_rules(delete):
     # You can adjust the rules if needed
-    sample_rules = [
-        {"value": "dog has:images", "tag": "dog pictures"},
-        {"value": "cat has:images -grumpy", "tag": "cat pictures"},
-    ]
-    payload = {"add": sample_rules}
+    default_rules = [{"value": "(a OR the) has:geo lang:en tweets_count:50", "tag": "active_user"}]
+    payload = {"add": default_rules}
     response = requests.post(
         "https://api.twitter.com/2/tweets/search/stream/rules",
         auth=bearer_oauth,
@@ -66,7 +63,6 @@ def set_rules(delete):
             "Cannot add rules (HTTP {}): {}".format(response.status_code, response.text)
         )
     print(json.dumps(response.json()))
-
 
 def get_stream(set):
     response = requests.get(
@@ -81,12 +77,9 @@ def get_stream(set):
         )
     
     for response_line in response.iter_lines():
-
         if response_line:
             json_response = json.loads(response_line)
             print(json.dumps(json_response, indent=4, sort_keys=True))
-
-
 
 def main():
     rules = get_rules()
