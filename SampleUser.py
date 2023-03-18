@@ -16,23 +16,23 @@ if __name__ == "__main__":
     set = client.set_rules(delete)
     user_params = {'user.fields' : 'location,name,description'}
 
-    for i in range(1000):
+    for i in range(1):
         # Sample 100 tweets at random
         try:
-            sample = client.get_stream(set, sample_size = 100)
+            sample = client.get_stream(set, sample_size = 50)
             user_ids = [tweet['data']['author_id'] for tweet in sample]
             # Each Tweet should have geo by default rules; 
             # sometimes it appears that this is blank however
             tweet_locations = [s['data'].get('geo').get('place_id') for s in sample]
             user_ids = [tweet['data']['author_id'] for tweet in sample]
             # We are exporting the locations for future use in GetPlaces.py
-            with open("placeids.txt", "a+") as place_file:
-                place_file.writelines(tweet_locations)
+            with open("placeids.txt", "a") as place_file:
+                line_breaks = [t + '\n' for t in tweet_locations]
+                place_file.writelines(line_breaks)
 
             user_params['ids'] = ','.join(user_ids)
             user_endpoint = client.BASE + "users/"
             users = client.connect_to_endpoint(user_endpoint, user_params)
-
             with open('users.json', 'a+') as f:
                 json.dump(users, f)
         except:
