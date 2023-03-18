@@ -11,6 +11,10 @@ import json
 consumer_key = os.environ.get("CONSUMER_KEY")
 consumer_secret = os.environ.get("CONSUMER_SECRET")
 
+
+with open('my_oauth.json', 'r') as f:
+    oauth_tokens = json.load(f)
+
 # User fields are adjustable, options include:
 # created_at, description, entities, id, location, name,
 # pinned_tweet_id, profile_image_url, protected,

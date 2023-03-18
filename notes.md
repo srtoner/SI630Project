@@ -1,6 +1,5 @@
 SI 630 Lecture notes: Training RNNs
 
-
 "Old school" ~ 2014 Era Neural Networks
 * Recurrent Neural Networks:
 	* Need to deal with sequences of different lengths
