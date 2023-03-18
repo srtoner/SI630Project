@@ -83,4 +83,4 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 with open('my_oauth.json', 'w') as f:
     json.dump(oauth_tokens, f)
 
-print("Pause:")
+print("Initialization Complete")

@@ -42,6 +42,9 @@ class TwitterClient:
         with open('my_oauth.json', 'r') as f:
             self.oauth_tokens = json.load(f)
         self.sample = []
+        rules = self.get_rules()
+        delete = self.delete_all_rules(rules)
+        set = self.set_rules(delete)
        
 
 # Authentication
@@ -85,7 +88,7 @@ class TwitterClient:
                 )
             )
         print(json.dumps(response.json()))
-
+        return response.json()
 
     def set_rules(self, delete):
         # You can adjust the rules if needed
@@ -93,7 +96,7 @@ class TwitterClient:
             {"value": "dog has:images", "tag": "dog pictures"},
             {"value": "cat has:images -grumpy", "tag": "cat pictures"},
         ]
-        payload = {"add": sample_rules}
+        payload = {"add": default_rules}
         response = requests.post(
             "https://api.twitter.com/2/tweets/search/stream/rules",
             auth=self.bearer_oauth,
