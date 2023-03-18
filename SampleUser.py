@@ -32,10 +32,13 @@ if __name__ == "__main__":
             user_params['ids'] = ','.join(user_ids)
             user_endpoint = client.BASE + "users/"
             users = client.connect_to_endpoint(user_endpoint, user_params)
-            
 
+            with open('users.json', 'a+') as f:
+                json.dump(users, f)
         except:
             # Rate limit, wait for it to expire
+            print("Rate Limit exceeded at {}".format(time.localtime()))
+            print("Waiting 15 min")
             time.sleep(900)
 
-        
+    print("DONE")
