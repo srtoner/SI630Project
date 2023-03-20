@@ -12,5 +12,3 @@ Run (in bash):
 2. Set rules by running filtered_stream.py
 
 3. All utility functions for getting rules, retrieving tweets, etc. are handled in TwitterUtils.py and can be imported
-
-4.

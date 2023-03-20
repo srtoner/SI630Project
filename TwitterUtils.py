@@ -123,7 +123,10 @@ class TwitterClient:
         return response.json()
 
 # Processing Stream
-    def get_stream(self, set, endpoint = 'tweets/search/', sample_size = 10):
+    def get_stream(self, set, endpoint = 'tweets/search/', sample_size = 10, keep_sample = False):
+        if not keep_sample:
+            self.sample = []
+
         response = requests.get(
             BASE + endpoint + 'stream', auth=self.bearer_oauth, stream=True , params = {'tweet.fields' : 'author_id,context_annotations,geo'}
         )

@@ -9,17 +9,13 @@ import time
 if __name__ == "__main__":
     # Set Seed for sampling users
     client = TU.TwitterClient()
-    # The below three lines are now taken care of in the init()
-    # call for client
-    rules = client.get_rules()
-    delete = client.delete_all_rules(rules)
-    set = client.set_rules(delete)
+
     user_params = {'user.fields' : 'location,name,description'}
 
-    for i in range(1):
+    for i in range(1000):
         # Sample 100 tweets at random
         try:
-            sample = client.get_stream(set, sample_size = 50)
+            sample = client.get_stream(None, sample_size = 50)
             user_ids = [tweet['data']['author_id'] for tweet in sample]
             # Each Tweet should have geo by default rules; 
             # sometimes it appears that this is blank however
@@ -31,14 +27,14 @@ if __name__ == "__main__":
                 place_file.writelines(line_breaks)
 
             user_params['ids'] = ','.join(user_ids)
-            user_endpoint = client.BASE + "users/"
+            user_endpoint = TU.BASE + "users/"
             users = client.connect_to_endpoint(user_endpoint, user_params)
             with open('users.json', 'a+') as f:
                 json.dump(users, f)
         except:
             # Rate limit, wait for it to expire
             print("Rate Limit exceeded at {}".format(time.localtime()))
-            print("Waiting 15 min")
-            time.sleep(900)
+            print("Waiting a min")
+            time.sleep(1000)
 
     print("DONE")
