@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import copy
+import pandas as pd
 import pickle as pkl
 
 import time
@@ -147,58 +148,127 @@ class TwitterClient:
                 break
 
         return self.sample
-    
-if __name__ == "__main__":
-    
-    test = TwitterClient()
-    rules = test.get_rules()
-    sample = test.get_stream(rules, sample_size=50)
-    user_params = {'user.fields' : 'location,name,description'}
-    #  user.derived.location.geo
-    tweet_locations = [s['data'].get('geo').get('place_id') for s in sample]
-    
-    user_ids = [tweet['data']['author_id'] for tweet in sample]
-    user_params['ids'] = ','.join(user_ids)
-    user_endpoint = BASE + "users/"
-    user_test = test.connect_to_endpoint(user_endpoint, user_params)
-    print("Pause") 
 
-    # Concatentate users.json with existing dict
+    def collect_user_ids(self, file_path): 
 
-    # with open('users.json', 'r') as f:
-    #     print("Length of users Regular Process): {}".format(len(user_test)))
-    #     json.dump(user_test, f)
-    rate_limit = False
-    location_params = {}
-    location_endpoint = GEO + "geo/id/"
-    location_params = '.json,'.join(tweet_locations)
-    places = {}
+        with open(file_path, "r") as file:
+            user_json = file.read()
 
-    if os.path.exists("places.pkl"):
-        with open('places.pkl', 'rb') as f:        
-            places = pkl.load(f)
+        wrapper = '{"total": [' + user_json.replace("}{", "},{") + "]}"
+        user_data = json.loads(wrapper)
+        users = [u['data'] for u in user_data["total"]]
+        flat_list = [user_id for user in users for user_id in user]
+        users_df = pd.DataFrame(flat_list)
+        users_df = users_df.drop(['withheld'], axis = 1)
 
-    # Beware of exceeding the rate limit
-    # TODO: Create some sort of script to wait until timeout complete
-    for place in tweet_locations:
-       if not places.get(place):
-            time.sleep(3)
+        return users_df
+
+    def collect_tweets(self, df, params, processed_ids): 
+
+        json_response = {'data' : []}
+        overall_twitter_list = []
+        user_ids = list(df['id'])
+        for id in user_ids:
+            if int(id) in processed_ids:
+                continue
+
+            url = "https://api.twitter.com/2/users/{}/tweets".format(id)
             try:
-                places[place] = api.geo_id(place)
+                json_response = self.connect_to_endpoint(url, params)
             except:
-                # Timeout
-                rate_limit = True
-                print("Length of places: {}".format(len(places)))
-                with open('places.pkl', 'wb') as f:
-                    pkl.dump(places, f)
-                break
+                print("Rate Limit exceeded at {}".format(time.localtime()))
+                print("Waiting 15 min")
+                with open("user_data_temp.pkl", "wb") as file:
+                    pkl.dump(overall_twitter_list, file)
+                time.sleep(900)
+
+            tweets = json_response.get('data')
+
+            if not tweets:
+                continue
+
+            count = 0
+            
+            for tweet in tweets: 
+                if not tweet.get("geo"):
+                    continue
+                
+                tweet_dict = {}
+                tweet_dict['user_id'] = id
+                tweet_dict['tweet_id'] = tweet['id']
+                tweet_dict['tweet_text'] = tweet['text']
+                tweet_dict['place_id'] = tweet['geo'].get('place_id')
+
+                overall_twitter_list.append(tweet_dict)
+                count += 1
+            
+                if count > 50: 
+                    break
+            
+            processed_ids.update(int(id))
+            
+        with open("processed_users.txt", "w") as file:
+        # If process is interrupted, don't redundantly sample same users
+            file.writelines(processed_ids)
         
-    print("Pause")
-    if not rate_limit:
-        with open('places.pkl', 'wb') as f:
-            print("Length of places (No Rate Limit): {}".format(len(places)))
-            pkl.dump(places, f)
+
+        print(overall_twitter_list)
+        
+        print("DONE")
+
+        return overall_twitter_list
+        
+if __name__ == "__main__":
+    print("Shalom")
+    # test = TwitterClient()
+    # rules = test.get_rules()
+    # sample = test.get_stream(rules, sample_size=50)
+    # user_params = {'user.fields' : 'location,name,description'}
+    # #  user.derived.location.geo
+    # tweet_locations = [s['data'].get('geo').get('place_id') for s in sample]
     
-    with open('users.json', 'a+') as f:
-        print("Length of users (Regular Process): {}".format(len(user_test)))
-        json.dump(user_test, f)
+    # user_ids = [tweet['data']['author_id'] for tweet in sample]
+    # user_params['ids'] = ','.join(user_ids)
+    # user_endpoint = BASE + "users/"
+    # user_test = test.connect_to_endpoint(user_endpoint, user_params)
+    # print("Pause") 
+
+    # # Concatentate users.json with existing dict
+
+    # # with open('users.json', 'r') as f:
+    # #     print("Length of users Regular Process): {}".format(len(user_test)))
+    # #     json.dump(user_test, f)
+    # rate_limit = False
+    # location_params = {}
+    # location_endpoint = GEO + "geo/id/"
+    # location_params = '.json,'.join(tweet_locations)
+    # places = {}
+
+    # if os.path.exists("places.pkl"):
+    #     with open('places.pkl', 'rb') as f:        
+    #         places = pkl.load(f)
+
+    # # Beware of exceeding the rate limit
+    # # TODO: Create some sort of script to wait until timeout complete
+    # for place in tweet_locations:
+    #    if not places.get(place):
+    #         time.sleep(3)
+    #         try:
+    #             places[place] = api.geo_id(place)
+    #         except:
+    #             # Timeout
+    #             rate_limit = True
+    #             print("Length of places: {}".format(len(places)))
+    #             with open('places.pkl', 'wb') as f:
+    #                 pkl.dump(places, f)
+    #             break
+        
+    # print("Pause")
+    # if not rate_limit:
+    #     with open('places.pkl', 'wb') as f:
+    #         print("Length of places (No Rate Limit): {}".format(len(places)))
+    #         pkl.dump(places, f)
+    
+    # with open('users.json', 'a+') as f:
+    #     print("Length of users (Regular Process): {}".format(len(user_test)))
+    #     json.dump(user_test, f)
