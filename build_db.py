@@ -2,6 +2,8 @@ import pymongo
 from pymongo import MongoClient
 import json
 
+
+# Mark for deletion?
 import pickle as pkl
 client = MongoClient()
 

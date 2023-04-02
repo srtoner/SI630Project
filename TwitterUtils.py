@@ -9,6 +9,7 @@ import time
 
 import tweepy
 
+twitter_username_re = '(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)'
 
 with open('my_oauth.json', 'r') as f:
     oauth_tokens = json.load(f)

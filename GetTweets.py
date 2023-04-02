@@ -43,5 +43,5 @@ if __name__ == "__main__":
     print("Pause")
 
         
-    with open("user_data.pkl", "wb") as file:
-        pkl.dump(data, file)
+    # with open("user_data.pkl", "wb") as file:
+    #     pkl.dump(data, file)
