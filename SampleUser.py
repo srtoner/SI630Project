@@ -13,7 +13,7 @@ if __name__ == "__main__":
     user_params = {'user.fields' : 'location,name,description'}
 
     for i in range(1000):
-        # Sample 100 tweets at random
+        # Sample tweets at random
         try:
             sample = client.get_stream(None, sample_size = 50)
             user_ids = [tweet['data']['author_id'] for tweet in sample]
