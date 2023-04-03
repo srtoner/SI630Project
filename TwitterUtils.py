@@ -198,6 +198,7 @@ class TwitterClient:
                 tweet_dict['tweet_id'] = tweet['id']
                 tweet_dict['tweet_text'] = tweet['text']
                 tweet_dict['place_id'] = tweet['geo'].get('place_id')
+                tweet_dict['convo_id'] = tweet['conversation_id']
 
                 overall_twitter_list.append(tweet_dict)
                 count += 1
@@ -205,12 +206,78 @@ class TwitterClient:
                 if count > 50: 
                     break
             
-            processed_ids.update(int(id))
+            processed_ids.update([int(id)])
             
         with open("processed_users.txt", "w") as file:
         # If process is interrupted, don't redundantly sample same users
             file.writelines(processed_ids)
         
+
+        print(overall_twitter_list)
+        
+        print("DONE")
+
+        return overall_twitter_list
+
+    def collect_convos(self, df, params, processed_ids): 
+
+        json_response = {'data' : []}
+        overall_twitter_list = []
+        tweet_ids = list(df['tweet_id'])
+        for id in tweet_ids:
+            if int(id) in processed_ids:
+                continue
+            
+            kernel_url = BASE + 'tweets/'
+            kernel_params = {'tweet.fields' : 'author_id,conversation_id,created_at,in_reply_to_user_id,referenced_tweets'}
+            kernel_params['ids'] = id
+            try:
+                kernel_tweet = self.connect_to_endpoint(kernel_url, kernel_params).get('data')
+                
+                params['query'] = 'conversation_id:' + kernel_tweet[0]['conversation_id']
+                url = "https://api.twitter.com/2/tweets/search/all"
+
+                json_response = self.connect_to_endpoint(url, params)
+                time.sleep(1)
+            except:
+                print(json_response)
+                print("Rate Limit exceeded at {}".format(time.localtime()))
+                print("Waiting 15 min")
+                with open("processed_tweets.txt", "w") as file:
+                # If process is interrupted, don't redundantly sample same users
+                    file.writelines([str(pid) for pid in processed_ids])
+
+                with open("user_data_temp.pkl", "wb") as file:
+                    pkl.dump(overall_twitter_list, file)
+                time.sleep(900)
+
+            tweets = json_response.get('data')
+
+            if not tweets:
+                continue
+
+            count = 0
+            
+            for tweet in tweets: 
+                tweet_dict = {}
+                tweet_dict['user_id'] = tweet['author_id']
+                tweet_dict['tweet_id'] = tweet['id']
+                tweet_dict['tweet_text'] = tweet['text']
+                tweet_dict['referenced_tweets'] = tweet['referenced_tweets']
+                tweet_dict['convo_id'] = tweet['conversation_id']
+                tweet_dict['reply_to_user_id'] = tweet['in_reply_to_user_id']
+
+                overall_twitter_list.append(tweet_dict)
+                count += 1
+            
+                if count > 50: 
+                    break
+            
+            processed_ids.update([int(id)])
+            
+        with open("processed_tweets.txt", "w") as file:
+        # If process is interrupted, don't redundantly sample same users
+            file.writelines([str(pid) + '\n' for pid in processed_ids])
 
         print(overall_twitter_list)
         
