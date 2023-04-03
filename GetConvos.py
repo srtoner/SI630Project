@@ -26,19 +26,20 @@ api = tweepy.API(auth)
 if __name__ == "__main__":
     client = TU.TwitterClient()
 
-    # Load info on users themselves
-    user_df = client.collect_user_ids("users.json")
-    params = {"max_results": 100,"tweet.fields": "id,text,geo"}
+    
+    with open("user_data.pkl", "rb") as file:
+        user_data = pd.DataFrame(pkl.load(file))
+    params = {"tweet.fields": "author_id,text,geo,conversation_id,created_at,in_reply_to_user_id,referenced_tweets"}
     # Init empty on first run
     data = []
  
-    processed_ids = set()
+    processed_ids = set(user_data.tweet_id)
 
-    with open("processed_users.txt", "r") as file:
+    with open("processed_tweets.txt", "r") as file:
         # If process is interrupted, don't redundantly sample same users
         processed_ids = set(file.readlines())     
 
-    data = client.collect_tweets(user_df, params, processed_ids)
+    data = client.collect_convos(user_data, params, processed_ids)
 
     print("Pause")
 
