@@ -26,9 +26,10 @@ api = tweepy.API(auth)
 if __name__ == "__main__":
     client = TU.TwitterClient()
 
-    
-    with open("tweets.pkl", "rb") as file:
-        user_data = pd.DataFrame(pkl.load(file))
+    user_data = pd.read_csv('filtered_data.csv')
+
+    # with open("user_data.pkl", "rb") as file:
+    #     user_data = pd.DataFrame(pkl.load(file))
     params = {"tweet.fields": "author_id,text,geo,conversation_id,created_at,in_reply_to_user_id,referenced_tweets"}
     # Init empty on first run
     data = []
@@ -46,3 +47,6 @@ if __name__ == "__main__":
         
     with open("user_data_convo.pkl", "wb") as file:
         pkl.dump(data, file)
+
+
+        

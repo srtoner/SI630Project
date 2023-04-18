@@ -171,6 +171,8 @@ class TwitterClient:
 
         json_response = {'data' : []}
         overall_twitter_list = []
+       
+
         user_ids = list(df['id'])
         for id in user_ids:
             if int(id) in processed_ids:
@@ -227,6 +229,11 @@ class TwitterClient:
 
         json_response = {'data' : []}
         overall_twitter_list = []
+
+        if os.path.exists('user_data_temp.pkl'):
+            with open("user_data_temp.pkl", "rb") as file:
+                        overall_twitter_list = pkl.load(file)
+
         tweet_ids = list(df['tweet_id'])
         for id in tweet_ids:
             if int(id) in processed_ids:
@@ -238,6 +245,8 @@ class TwitterClient:
             try:
                 kernel_tweet = self.connect_to_endpoint(kernel_url, kernel_params).get('data')
                 
+                if kernel_tweet is None:
+                    continue
                 params['query'] = 'conversation_id:' + kernel_tweet[0]['conversation_id']
                 url = "https://api.twitter.com/2/tweets/search/all"
 
@@ -249,7 +258,7 @@ class TwitterClient:
                 print("Waiting 15 min")
                 with open("processed_tweets.txt", "w") as file:
                 # If process is interrupted, don't redundantly sample same users
-                    file.writelines([str(pid) for pid in processed_ids])
+                    file.writelines([str(pid) + '\n' for pid in processed_ids])
 
                 with open("user_data_temp.pkl", "wb") as file:
                     pkl.dump(overall_twitter_list, file)
