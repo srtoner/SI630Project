@@ -41,13 +41,16 @@ class TwitterClient:
         # export 'BEARER_TOKEN'='<your_bearer_token>'
         self.bearer_token = os.environ.get("BEARER_TOKEN")
         self.stream = None
+        if not os.path.exists('my_oauth.json'):
+            print("ERROR: Please initialize the connection by running InitConnection.py first.")
+            return
+        
         with open('my_oauth.json', 'r') as f:
             self.oauth_tokens = json.load(f)
         self.sample = []
         rules = self.get_rules()
         delete = self.delete_all_rules(rules)
         set = self.set_rules(delete)
-       
 
 # Authentication
     def bearer_oauth(self, r):

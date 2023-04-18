@@ -38,10 +38,10 @@ if __name__ == "__main__":
         # If process is interrupted, don't redundantly sample same users
         processed_ids = set(file.readlines())     
 
-    data = client.collect_tweets(user_df, params, processed_ids)
+    # data = client.collect_tweets(user_df, params, processed_ids)
 
     print("Pause")
 
         
-    with open("user_data_convo.pkl", "wb") as file:
-        pkl.dump(data, file)
+    # with open("user_data_.pkl", "wb") as file:
+    #     pkl.dump(data, file)
