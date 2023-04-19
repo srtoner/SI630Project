@@ -27,7 +27,7 @@ df = pd.read_csv('filtered_data.csv')
 
 df.info()
 
-df = df.drop(['withheld'], axis = 1)
+# df = df.drop(['withheld'], axis = 1)
 
 country_list = ['United States', 'United Kingdom', 'Canada', 'India', 'Australia', 'Nigeria']
 df= df[df['country'].isin(country_list)]
