@@ -51,7 +51,8 @@ updated_df.shape
 id2label = {0: "United States", 1: "United Kingdom", 2: "Canada", 3: "Australia", 4: "India", 5: "Nigeria"}
 label2id = {"United States": 0, "United Kingdom": 1, "Canada": 2, "Australia": 3, "India": 4, "Nigeria": 5}
 
-sample_df = updated_df.sample(5000, random_state = 1)
+# sample_df = updated_df.sample(5000, random_state = 1)
+sample_df = updated_df #.sample(5000, random_state = 1)
 
 sample_df.head()
 
